@@ -1,39 +1,23 @@
 #include "MitExample/Mods/interface/NtuplesMod.h"
 
+#include "MitAna/DataTree/interface/Names.h"
+
+#include "TVector2.h"
+
 #include <vector>
+#include <cstring>
 
 ClassImp(mithep::NtuplesMod)
 
 namespace mithep {
 
-  void
-  NtuplesMod::Muon::init(NtuplesMod::Event& _evt, unsigned _iM)
-  {
-    pt = &_evt.muPt[_iM];
-    eta = &_evt.muEta[_iM];
-    phi = &_evt.muPhi[_iM];
-    px = &_evt.muPx[_iM];
-    py = &_evt.muPy[_iM];
-    pz = &_evt.muPz[_iM];
-    charge = &_evt.muCharge[_iM];
-    energy = &_evt.muEnergy[_iM];
-    isTight = &_evt.muIsTight[_iM];
-    isSoft = &_evt.muIsSoft[_iM];
-  }
-
-  NtuplesMod::Event::Event() :
-    muN(0)
-  {
-    for (unsigned iM(0); iM != NMAX; ++iM)
-      muons[iM].init(*this, iM);
-  }
-
   NtuplesMod::NtuplesMod(char const* _name/* = "NtuplesMod"*/, char const* _title/* = "Flat-tree ntuples producer"*/) :
     BaseMod(_name, _title),
-    fTightMuonsName("TightMuons"),
-    fSoftMuonsName("SoftMuons"),
-    fTightMuons(0),
-    fSoftMuons(0),
+    fTagElectronsName("TagElectrons"),
+    fProbePhotonsName("ProbePhotons"),
+    fTriggerObjectsName(Names::gkHltObjBrn),
+    fTagElectrons(0),
+    fProbePhotons(0),
     fEvent(),
     fNtuples(0)
   {
@@ -42,53 +26,56 @@ namespace mithep {
   void
   NtuplesMod::Process()
   {
-    fTightMuons = GetObjThisEvt<MuonCol>(fTightMuonsName);
-    fSoftMuons = GetObjThisEvt<MuonCol>(fSoftMuonsName);
+    LoadEventObject(fTagElectronsName, fTagElectrons);
+    LoadEventObject(fProbePhotonsName, fProbePhotons);
 
-    if (!fTightMuons || !fSoftMuons) {
-      std::cerr << "Could not find muons in the event." << std::endl;
+    if (!fTagElectrons || !fProbePhotons) {
+      std::cerr << "Could not find electrons in the event." << std::endl;
       return;
     }
 
-    fEvent.muN = 0;
+    std::vector<TriggerObject const*> singleEle;
+    for (unsigned iO(0); iO != fTriggerObjects->GetEntries(); ++iO) {
+      TriggerObject const& to(*fTriggerObjects->At(iO));
 
-    for (unsigned iM(0); iM != fTightMuons->GetEntries(); ++iM) {
-      mithep::Muon const& inMu(*fTightMuons->At(iM));
-      NtuplesMod::Muon& outMu(fEvent.muons[fEvent.muN]);
-
-      *outMu.pt = inMu.Pt();
-      *outMu.eta = inMu.Eta();
-      *outMu.phi = inMu.Phi();
-      *outMu.px = inMu.Px();
-      *outMu.py = inMu.Py();
-      *outMu.pz = inMu.Pz();
-      *outMu.energy = inMu.E();
-      *outMu.charge = int(inMu.Charge());
-      *outMu.isTight = true;
-      *outMu.isSoft = fSoftMuons->HasObject(&inMu);
-
-      ++fEvent.muN;
+      if (std::strcmp(to.ModuleName(), "hltL1EG25Ele27WP85GsfTrackIsoFilter") == 0)
+        singleEle.push_back(&to);
     }
 
-    for (unsigned iM(0); iM != fSoftMuons->GetEntries(); ++iM) {
-      mithep::Muon const& inMu(*fSoftMuons->At(iM));
-      inMu.Mom();
-      if (fTightMuons->HasObject(&inMu))
-        continue;
-      NtuplesMod::Muon& outMu(fEvent.muons[fEvent.muN]);
+    if (singleEle.size() == 0)
+      return;
 
-      *outMu.pt = inMu.Pt();
-      *outMu.eta = inMu.Eta();
-      *outMu.phi = inMu.Phi();
-      *outMu.px = inMu.Px();
-      *outMu.py = inMu.Py();
-      *outMu.pz = inMu.Pz();
-      *outMu.energy = inMu.E();
-      *outMu.charge = int(inMu.Charge());
-      *outMu.isTight = false;
-      *outMu.isSoft = true;
+    std::vector<Electron const*> tags;
+    for (unsigned iE(0); iE != fTagElectrons->GetEntries(); ++iE) {
+      Electron const& inEle(*fTagElectrons->At(iE));
 
-      ++fEvent.muN;
+      unsigned iT(0);
+      for (; iT != singleEle.size(); ++iT) {
+        double dEta(singleEle[iT]->Eta() - inEle.Eta());
+        double dPhi(TVector2::Phi_mpi_pi(singleEle[iT]->Phi() - inEle.Phi()));
+
+        if (dEta * dEta + dPhi * dPhi < 0.15 * 0.15)
+          break;
+      }
+      tags.push_back(&inEle);
+    }
+
+    std::vector<Photon const*> probes;
+    for (unsigned iP(0); iP != fProbePhotons->GetEntries(); ++iP) {
+      Photon const& inPh(*fProbePhotons->At(iP));
+
+      probes.push_back(&inPh);
+    }
+
+    for (Electron const* tag : tags) {
+      for (Photon const* probe : probes) {
+        // candidates overlap in supercluster -> a same EG object
+        if (tag->SCluster() == probe->SCluster())
+          continue;
+
+        fEvent.pairs[fEvent.nPairs].set(*tag, *probe);
+        ++fEvent.nPairs;
+      }
     }
 
     fNtuples->Fill();
@@ -97,18 +84,8 @@ namespace mithep {
   void
   NtuplesMod::SlaveBegin()
   {
-    fNtuples = new TTree("events", "Double Muon events");
-    fNtuples->Branch("muon.n", &fEvent.muN, "n/i");
-    fNtuples->Branch("muon.pt", fEvent.muPt, "pt[muon.n]/F");
-    fNtuples->Branch("muon.eta", fEvent.muEta, "eta[muon.n]/F");
-    fNtuples->Branch("muon.phi", fEvent.muPhi, "phi[muon.n]/F");
-    fNtuples->Branch("muon.px", fEvent.muPx, "px[muon.n]/F");
-    fNtuples->Branch("muon.py", fEvent.muPy, "py[muon.n]/F");
-    fNtuples->Branch("muon.pz", fEvent.muPz, "pz[muon.n]/F");
-    fNtuples->Branch("muon.energy", fEvent.muEnergy, "energy[muon.n]/F");
-    fNtuples->Branch("muon.charge", fEvent.muCharge, "charge[muon.n]/S");
-    fNtuples->Branch("muon.isTight", fEvent.muIsTight, "isTight[muon.n]/O");
-    fNtuples->Branch("muon.isSoft", fEvent.muIsSoft, "isSoft[muon.n]/O");
+    fNtuples = new TTree("events", "Double Electron events");
+    fEvent.bookBranches(*fNtuples);
 
     AddOutput(fNtuples);
   }
