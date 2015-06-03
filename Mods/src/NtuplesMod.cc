@@ -34,6 +34,13 @@ namespace mithep {
       return;
     }
 
+    LoadEventObject(fTriggerObjectsName, fTriggerObjects);
+
+    if (!fTriggerObjects) {
+      std::cerr << "Could not find trigger objects in the event." << std::endl;
+      return;
+    } 
+
     std::vector<TriggerObject const*> singleEle;
     for (unsigned iO(0); iO != fTriggerObjects->GetEntries(); ++iO) {
       TriggerObject const& to(*fTriggerObjects->At(iO));
