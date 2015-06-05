@@ -14,6 +14,7 @@ mithep::NtuplesMod::NtuplesMod(char const* _name/* = "mithep::NtuplesMod"*/, cha
   fTagElectronsName("TagElectrons"),
   fProbePhotonsName("ProbePhotons"),
   fTriggerObjectsName(mithep::Names::gkHltObjBrn),
+  fTriggerMatchName(""),
   fTagElectrons(0),
   fProbePhotons(0),
   fEvent(),
@@ -32,42 +33,56 @@ mithep::NtuplesMod::Process()
     return;
   }
 
-  LoadEventObject(fTriggerObjectsName, fTriggerObjects);
+  bool doTriggerMatch(fTriggerMatchName.Length() != 0);
 
-  if (!fTriggerObjects) {
-    std::cerr << "Could not find trigger objects in the event." << std::endl;
-    return;
-  } 
+  std::vector<TriggerObject const*> matchObjects;
 
-  std::vector<TriggerObject const*> singleEle;
-  for (unsigned iO(0); iO != fTriggerObjects->GetEntries(); ++iO) {
-    TriggerObject const& to(*fTriggerObjects->At(iO));
+  if (doTriggerMatch) {
+    LoadEventObject(fTriggerObjectsName, fTriggerObjects);
 
-    if (std::strcmp(to.ModuleName(), "hltL1EG25Ele27WP85GsfTrackIsoFilter") == 0)
-      singleEle.push_back(&to);
+    if (!fTriggerObjects) {
+      std::cerr << "Could not find trigger objects in the event." << std::endl;
+      return;
+    } 
+
+    for (unsigned iO(0); iO != fTriggerObjects->GetEntries(); ++iO) {
+      TriggerObject const& to(*fTriggerObjects->At(iO));
+
+      if (std::strcmp(to.ModuleName(), fTriggerMatchName) == 0)
+        matchObjects.push_back(&to);
+    }
+
+    if (matchObjects.size() == 0)
+      return;
   }
-
-  if (singleEle.size() == 0)
-    return;
 
   std::vector<Electron const*> tags;
   for (unsigned iE(0); iE != fTagElectrons->GetEntries(); ++iE) {
     Electron const& inEle(*fTagElectrons->At(iE));
 
-    unsigned iT(0);
-    for (; iT != singleEle.size(); ++iT) {
-      double dEta(singleEle[iT]->Eta() - inEle.Eta());
-      double dPhi(TVector2::Phi_mpi_pi(singleEle[iT]->Phi() - inEle.Phi()));
+    if (doTriggerMatch) {
+      unsigned iT(0);
+      for (; iT != matchObjects.size(); ++iT) {
+        double dEta(matchObjects[iT]->Eta() - inEle.Eta());
+        double dPhi(TVector2::Phi_mpi_pi(matchObjects[iT]->Phi() - inEle.Phi()));
 
-      if (dEta * dEta + dPhi * dPhi < 0.15 * 0.15)
-        break;
+        if (dEta * dEta + dPhi * dPhi < 0.15 * 0.15)
+          break;
+      }
+      if (iT == matchObjects.size())
+        continue;
     }
+
+    // apply more cuts to tag
+
     tags.push_back(&inEle);
   }
 
   std::vector<Photon const*> probes;
   for (unsigned iP(0); iP != fProbePhotons->GetEntries(); ++iP) {
     Photon const& inPh(*fProbePhotons->At(iP));
+
+    // apply some additional cuts to probe
 
     probes.push_back(&inPh);
   }

@@ -19,6 +19,7 @@ namespace mithep {
     void SetTagElectronsName(char const* _name) { fTagElectronsName = _name; }
     void SetProbePhotonsName(char const* _name) { fProbePhotonsName = _name; }
     void SetTriggerObjectsName(char const* _name) { fTriggerObjectsName = _name; }
+    void SetTriggerMatchName(char const* _name) { fTriggerMatchName = _name; }
 
   protected:
     void Process() override;
@@ -28,6 +29,7 @@ namespace mithep {
     TString fTagElectronsName;
     TString fProbePhotonsName;
     TString fTriggerObjectsName;
+    TString fTriggerMatchName;
 
     ElectronCol const* fTagElectrons;
     PhotonCol const* fProbePhotons;

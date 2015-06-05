@@ -60,6 +60,7 @@ ntuplesMod = mithep.NtuplesMod('NtuplesMod', 'Flat ntuples producer')
 ntuplesMod.SetTagElectronsName('TightElectrons')
 ntuplesMod.SetProbePhotonsName('MediumPhotonsNoEVeto')
 ntuplesMod.SetTriggerObjectsName('SingleElectronTriggerObjects')
+ntuplesMod.SetTriggerMatchName('hltEle27WP80TrackIsoFilter')
 
 analysis.AddSuperModule(hltMod)
 hltMod.Add(goodPVMod)
