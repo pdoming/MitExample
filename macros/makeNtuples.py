@@ -10,20 +10,20 @@ mithep = ROOT.mithep
 analysis = mithep.Analysis()
 analysis.SetOutputName('ntuples.root')
 
-analysis.AddFile('/scratch/yiiyama/EENtuples/bambu-output-file-tmp_000.root')
+analysis.AddFile('/mnt/hadoop/cms/store/user/paus/filefi/032/SingleElectron+Run2012A-22Jan2013-v1+AOD/3EE27797-3773-E211-B2A6-00266CF27430.root')
 analysis.SetProcessNEvents(1000)
 
 hltMod = mithep.HLTMod()
 hltMod.SetBitsName('HLTBits')
 hltMod.SetTrigObjsName('SingleElectronTriggerObjects')
-hltMod.AddTrigger('HLT_Ele27_WP85_Gsf_v*')
+hltMod.AddTrigger('HLT_Ele27_WP80_v*')
 
 goodPVMod = mithep.GoodPVFilterMod()
 goodPVMod.SetMinVertexNTracks(0)
 goodPVMod.SetMinNDof(4)
 goodPVMod.SetMaxAbsZ(24.0)
 goodPVMod.SetMaxRho(2.0)
-goodPVMod.SetIsMC(True)
+goodPVMod.SetIsMC(False)
 goodPVMod.SetVertexesName('PrimaryVertexes')
 
 eleIdMod = mithep.ElectronIDMod()
@@ -53,7 +53,7 @@ phoIdMod.SetApplyElectronVeto(False)
 phoIdMod.SetApplyPixelSeed(False)
 phoIdMod.SetApplyConversionId(False)
 phoIdMod.SetApplyFiduciality(True)
-phoIdMod.SetIsData(False)
+phoIdMod.SetIsData(True)
 phoIdMod.SetPhotonsFromBranch(True)
 
 ntuplesMod = mithep.NtuplesMod('NtuplesMod', 'Flat ntuples producer')
