@@ -11,6 +11,6 @@ echo " MitPhysics/bin/setup.sh"
 echo "*************************"
 
 # Generate ROOT dictionaries for classes defined in this module
-$CMSSW_BASE/src/MitCommon/bin/genDict.sh MitExample/Mods
+$CMSSW_BASE/src/MitCommon/bin/genDict.sh MitExample/Mods MitExample/Fitting
 
 exit 0

@@ -1,7 +1,12 @@
+// AUTO-GENERATED CODE - EDIT Tag.h / Probe.h and run scripts/updateClasses.py
+
 #ifndef MITEXAMPLE_DATAFORMATS_TNPEVENT_H
 #define MITEXAMPLE_DATAFORMATS_TNPEVENT_H
 
-#include "MitExample/DataFormats/interface/TnPPair.h"
+#include "MitExample/DataFormats/interface/Tag.h"
+#include "MitExample/DataFormats/interface/Probe.h"
+
+#include <utility>
 
 class TTree;
 
@@ -9,29 +14,42 @@ namespace mithep {
 
   class TnPEvent {
   public:
-    static unsigned const NMAX = 64;
+    static UInt_t const NMAX = 64;
+    typedef std::pair<Tag, Probe> TnPPair;
     
     TnPEvent();
+    ~TnPEvent();
+
+    TnPPair at(UInt_t) const;
+    TnPPair operator[](UInt_t _idx) const { return at(_idx); }
+
+    TnPPair addNew();
+
+    void clear() { nPairs = 0; }
+
     void bookBranches(TTree&);
+    void setAddress(TTree&);
 
-    unsigned nPairs;
-    TnPPair pairs[NMAX];
+  private:
+    Tag* tag_[NMAX];
+    Probe* probe_[NMAX];
 
-    float tagPt[NMAX];
-    float tagEta[NMAX];
-    float tagPhi[NMAX];
-    float tagPx[NMAX];
-    float tagPy[NMAX];
-    float tagPz[NMAX];
-    float tagEnergy[NMAX];
-      
-    float probePt[NMAX];
-    float probeEta[NMAX];
-    float probePhi[NMAX];
-    float probePx[NMAX];
-    float probePy[NMAX];
-    float probePz[NMAX];
-    float probeEnergy[NMAX];
+  public:
+    UInt_t nPairs;
+    Float_t tagPt[NMAX];
+    Float_t tagEta[NMAX];
+    Float_t tagPhi[NMAX];
+    Float_t tagPx[NMAX];
+    Float_t tagPy[NMAX];
+    Float_t tagPz[NMAX];
+    Float_t tagEnergy[NMAX];
+    Float_t probePt[NMAX];
+    Float_t probeEta[NMAX];
+    Float_t probePhi[NMAX];
+    Float_t probePx[NMAX];
+    Float_t probePy[NMAX];
+    Float_t probePz[NMAX];
+    Float_t probeEnergy[NMAX];
   };
 
 }

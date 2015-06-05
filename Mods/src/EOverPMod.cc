@@ -30,6 +30,9 @@ namespace mithep {
     for (unsigned iE(0); iE != fElectrons->GetEntries(); ++iE) {
       mithep::Electron const& ele(*fElectrons->At(iE));
 
+      std::cout << ele.CoviEtaiEta() << " " << ele.CoviEtaiEta5x5() << std::endl;
+      std::cout << ele.ECALOnlySCluster() << std::endl;
+
       mithep::SuperCluster const* sc(ele.SCluster());
       mithep::Track const* trk(ele.GsfTrk());
 
