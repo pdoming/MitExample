@@ -2,7 +2,7 @@
 #define MITEXAMPLE_MODS_NTUPLESMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h"
-#include "MitAna/DataTree/interface/ElectronCol.h"
+#include "MitAna/DataTree/interface/MuonCol.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitAna/DataTree/interface/TriggerObjectCol.h"
 
@@ -16,7 +16,7 @@ namespace mithep {
   class NtuplesMod : public BaseMod {
   public:
     NtuplesMod(char const* name = "NtuplesMod", char const* title = "Flat-tree ntuples producer");
-    void SetTagElectronsName(char const* _name) { fTagElectronsName = _name; }
+    void SetTagMuonsName(char const* _name) { fTagMuonsName = _name; }
     void SetProbePhotonsName(char const* _name) { fProbePhotonsName = _name; }
     void SetTriggerObjectsName(char const* _name) { fTriggerObjectsName = _name; }
     void SetTriggerMatchName(char const* _name) { fTriggerMatchName = _name; }
@@ -26,12 +26,12 @@ namespace mithep {
     void SlaveBegin() override;
     void SlaveTerminate() override;
 
-    TString fTagElectronsName;
+    TString fTagMuonsName;
     TString fProbePhotonsName;
     TString fTriggerObjectsName;
     TString fTriggerMatchName;
 
-    ElectronCol const* fTagElectrons;
+    MuonCol const* fTagMuons;
     PhotonCol const* fProbePhotons;
     TriggerObjectCol const* fTriggerObjects;
 
