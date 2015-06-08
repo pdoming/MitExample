@@ -1,8 +1,11 @@
+// Being modified to tag and probe mumugamma
 #include "MitExample/Mods/interface/NtuplesMod.h"
-
 #include "MitAna/DataTree/interface/Names.h"
-
 #include "TVector2.h"
+
+// Muon+Photon ID Mods - ?
+#include "MitPhysics/Mods/src/MuonIDMod.cc"
+#include "MitPhysics/Mods/src/PhotonIDMod.cc"
 
 #include <vector>
 #include <cstring>
@@ -11,7 +14,7 @@ ClassImp(mithep::NtuplesMod)
 
 mithep::NtuplesMod::NtuplesMod(char const* _name/* = "mithep::NtuplesMod"*/, char const* _title/* = "Flat-tree ntuples producer"*/) :
   BaseMod(_name, _title),
-  fTagElectronsName("TagElectrons"),
+  fTagMuonsName("TagMuons"),
   fProbePhotonsName("ProbePhotons"),
   fTriggerObjectsName(mithep::Names::gkHltObjBrn),
   fTriggerMatchName(""),
@@ -25,11 +28,11 @@ mithep::NtuplesMod::NtuplesMod(char const* _name/* = "mithep::NtuplesMod"*/, cha
 void
 mithep::NtuplesMod::Process()
 {
-  LoadEventObject(fTagElectronsName, fTagElectrons);
+  LoadEventObject(fTagMuonsName, fTagMuons);
   LoadEventObject(fProbePhotonsName, fProbePhotons);
 
-  if (!fTagElectrons || !fProbePhotons) {
-    std::cerr << "Could not find electrons in the event." << std::endl;
+  if (!fTagMuons || !fProbePhotons) {
+    std::cerr << "Could not find muons in the event." << std::endl;
     return;
   }
 
@@ -56,9 +59,9 @@ mithep::NtuplesMod::Process()
       return;
   }
 
-  std::vector<Electron const*> tags;
-  for (unsigned iE(0); iE != fTagElectrons->GetEntries(); ++iE) {
-    Electron const& inEle(*fTagElectrons->At(iE));
+  std::vector<Muon const*> tags;
+  for (unsigned iE(0); iE != fTagMuons->GetEntries(); ++iE) {
+    Muon const& inEle(*fTagMuons->At(iE));
 
     if (doTriggerMatch) {
       unsigned iT(0);
@@ -89,7 +92,7 @@ mithep::NtuplesMod::Process()
 
   fEvent.clear();
 
-  for (Electron const* tag : tags) {
+  for (Muon const* tag : tags) {
     for (Photon const* probe : probes) {
       // candidates overlap in supercluster -> a same EG object
       if (tag->SCluster() == probe->SCluster())
@@ -121,7 +124,7 @@ mithep::NtuplesMod::Process()
 void
 mithep::NtuplesMod::SlaveBegin()
 {
-  fNtuples = new TTree("events", "Double Electron events");
+  fNtuples = new TTree("events", "Double Muon events");
   fEvent.bookBranches(*fNtuples);
 
   AddOutput(fNtuples);
