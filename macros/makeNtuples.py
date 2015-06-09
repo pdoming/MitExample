@@ -11,12 +11,16 @@ analysis = mithep.Analysis()
 analysis.SetOutputName('ntuples.root')
 
 analysis.AddFile('/mnt/hadoop/cms/store/user/paus/filefi/032/r12a-dmu-j22-v1/001AE30A-BA81-E211-BBE7-003048FFD770.root')
-analysis.SetProcessNEvents(1000)
+analysis.SetProcessNEvents(100)
 
 hltMod = mithep.HLTMod()
+#hltMod.SetPrintTable(True)
 hltMod.SetBitsName('HLTBits')
 hltMod.SetTrigObjsName('DoubleMuTriggerObjects')
-hltMod.AddTrigger('HLT_Mu22_TkMu8_v*')            # http://j2eeps.cern.ch/cms-project-confdb-hltdev/browser/ click cdaq/physics/Run2012/
+hltMod.AddTrigger('HLT_Mu17_v*')
+hltMod.AddTrigger('HLT_Mu17_Mu8_v*')
+hltMod.AddTrigger('HLT_Mu17_TkMu8_v*') # We prpobably don't need this one
+hltMod.AddTrigger('HLT_Mu22_TkMu8_v*')
 
 goodPVMod = mithep.GoodPVFilterMod()
 goodPVMod.SetMinVertexNTracks(0)
@@ -32,7 +36,7 @@ muIdMod.SetInputName('Muons')
 muIdMod.SetOutputName('TightMuons')
 
 phoIdMod = mithep.PhotonIDMod()
-phoIdMod.SetPtMin(10.0)
+phoIdMod.SetPtMin(5.0)
 phoIdMod.SetOutputName('MediumPhotons')
 phoIdMod.SetIDType('EgammaMedium')
 phoIdMod.SetIsoType('MITPUCorrected')
@@ -43,15 +47,15 @@ phoIdMod.SetApplyFiduciality(True)
 phoIdMod.SetIsData(True)
 phoIdMod.SetPhotonsFromBranch(True)
 
-ntuplesMod = mithep.NtuplesMod('NtuplesMod', 'Flat ntuples producer')
-ntuplesMod.SetTagMuonsName('TightMuons')         # ?
-ntuplesMod.SetProbePhotonsName('MediumPhotons')
-ntuplesMod.SetTriggerObjectsName('DoubleMuTriggerObjects')
+mumuGammaMod = mithep.MuMuGammaMod('MuMuGammaMod', 'Flat mumuGamma producer')
+mumuGammaMod.SetMuonsName('TightMuons')
+mumuGammaMod.SetMediumPhotonsName('MediumPhotons')
+mumuGammaMod.SetTriggerObjectsName('DoubleMuTriggerObjects')
 
 analysis.AddSuperModule(hltMod)
 hltMod.Add(goodPVMod)
 goodPVMod.Add(muIdMod)
 muIdMod.Add(phoIdMod)
-phoIdMod.Add(ntuplesMod)
+phoIdMod.Add(mumuGammaMod)
 
 analysis.Run(False)

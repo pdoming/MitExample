@@ -10,12 +10,12 @@
 ClassImp(mithep::NtuplesMod)
 
 mithep::NtuplesMod::NtuplesMod(char const* _name/* = "mithep::NtuplesMod"*/, char const* _title/* = "Flat-tree ntuples producer"*/) :
-  BaseMod(_name, _title),
-  fTagMuonsName("TagMuons"),
+BaseMod(_name, _title),
+  fTagElectronsName("TagElectrons"),
   fProbePhotonsName("ProbePhotons"),
   fTriggerObjectsName(mithep::Names::gkHltObjBrn),
   fTriggerMatchName(""),
-  fTagMuons(0),
+  fTagElectrons(0),
   fProbePhotons(0),
   fEvent(),
   fNtuples(0)
@@ -25,13 +25,15 @@ mithep::NtuplesMod::NtuplesMod(char const* _name/* = "mithep::NtuplesMod"*/, cha
 void
 mithep::NtuplesMod::Process()
 {
-  LoadEventObject(fTagMuonsName, fTagMuons);
+  LoadEventObject(fTagElectronsName, fTagElectrons);
   LoadEventObject(fProbePhotonsName, fProbePhotons);
 
-  if (!fTagMuons || !fProbePhotons) {
-    std::cerr << "Could not find muons in the event." << std::endl;
+  if (!fTagElectrons || !fProbePhotons) {
+    std::cerr << "Could not find electrons in the event." << std::endl;
     return;
   }
+
+  bool doTriggerMatch(fTriggerMatchName.Length() != 0);
 
   std::vector<TriggerObject const*> matchObjects;
 
@@ -54,15 +56,15 @@ mithep::NtuplesMod::Process()
       return;
   }
 
-  std::vector<Muon const*> tags;
-  for (unsigned iE(0); iE != fTagMuons->GetEntries(); ++iE) {
-    Muon const& inMu(*fTagMuons->At(iE));
+  std::vector<Electron const*> tags;
+  for (unsigned iE(0); iE != fTagElectrons->GetEntries(); ++iE) {
+    Electron const& inEle(*fTagElectrons->At(iE));
 
     if (doTriggerMatch) {
       unsigned iT(0);
       for (; iT != matchObjects.size(); ++iT) {
-        double dEta(matchObjects[iT]->Eta() - inMu.Eta());
-        double dPhi(TVector2::Phi_mpi_pi(matchObjects[iT]->Phi() - inMu.Phi()));
+        double dEta(matchObjects[iT]->Eta() - inEle.Eta());
+        double dPhi(TVector2::Phi_mpi_pi(matchObjects[iT]->Phi() - inEle.Phi()));
 
         if (dEta * dEta + dPhi * dPhi < 0.15 * 0.15)
           break;
@@ -73,7 +75,7 @@ mithep::NtuplesMod::Process()
 
     // apply more cuts to tag
 
-    tags.push_back(&inMu);
+    tags.push_back(&inEle);
   }
 
   std::vector<Photon const*> probes;
@@ -87,11 +89,11 @@ mithep::NtuplesMod::Process()
 
   fEvent.clear();
 
-  for (Muon const* tag : tags) {
+  for (Electron const* tag : tags) {
     for (Photon const* probe : probes) {
       // candidates overlap in supercluster -> a same EG object
-      // if (tag->SCluster() == probe->SCluster())    // No such thing as a muon supercluster
-      //   continue;
+      if (tag->SCluster() == probe->SCluster())
+        continue;
 
       auto&& pair(fEvent.addNew());
 
@@ -119,7 +121,7 @@ mithep::NtuplesMod::Process()
 void
 mithep::NtuplesMod::SlaveBegin()
 {
-  fNtuples = new TTree("events", "Double Muon events");
+  fNtuples = new TTree("events", "Double Electron events");
   fEvent.bookBranches(*fNtuples);
 
   AddOutput(fNtuples);
@@ -129,5 +131,3 @@ void
 mithep::NtuplesMod::SlaveTerminate()
 {
 }
-
-

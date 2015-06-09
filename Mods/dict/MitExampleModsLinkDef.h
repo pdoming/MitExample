@@ -1,5 +1,6 @@
 #include "MitExample/Mods/interface/EOverPMod.h"
 #include "MitExample/Mods/interface/NtuplesMod.h"
+#include "MitExample/Mods/interface/MuMuGammaMod.h"
 #include "MitExample/Mods/interface/TriggerEfficiencyMod.h"
 
 #ifdef __CLING__
@@ -12,5 +13,6 @@
 
 #pragma link C++ class mithep::EOverPMod+;
 #pragma link C++ class mithep::NtuplesMod+;
+#pragma link C++ class mithep::MuMuGammaMod+;
 #pragma link C++ class mithep::TriggerEfficiencyMod+;
 #endif
