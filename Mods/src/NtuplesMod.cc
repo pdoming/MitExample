@@ -3,10 +3,6 @@
 #include "MitAna/DataTree/interface/Names.h"
 #include "TVector2.h"
 
-// Muon+Photon ID Mods - ?
-#include "MitPhysics/Mods/src/MuonIDMod.cc"
-#include "MitPhysics/Mods/src/PhotonIDMod.cc"
-
 #include <vector>
 #include <cstring>
 
