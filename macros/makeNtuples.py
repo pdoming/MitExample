@@ -10,14 +10,17 @@ mithep = ROOT.mithep
 analysis = mithep.Analysis()
 analysis.SetOutputName('ntuples.root')
 
-analysis.AddFile('/mnt/hadoop/cms/store/user/paus/filefi/032/SingleElectron+Run2012A-22Jan2013-v1+AOD/3EE27797-3773-E211-B2A6-00266CF27430.root')
+analysis.AddFile(analysis.AddFile('/mnt/hadoop/cms/store/user/paus/filefi/032/r12a-dmu-j22-v1/001AE30A-BA81-E211-BBE7-003048FFD770.root')
 analysis.SetProcessNEvents(1000)
 
 hltMod = mithep.HLTMod()
 hltMod.SetBitsName('HLTBits')
-hltMod.SetTrigObjsName('SingleElectronTriggerObjects')
-hltMod.AddTrigger('HLT_Ele27_WP80_v*')
+# Check for naming discrepancy
+hltMod.SetTrigObjsName('DoubleMuonTriggerObjects')
+hltMod.AddTrigger('HLT_Mu17_v5')
 
+# ------------------------------------------
+# I don't think this has to be changed
 goodPVMod = mithep.GoodPVFilterMod()
 goodPVMod.SetMinVertexNTracks(0)
 goodPVMod.SetMinNDof(4)
@@ -25,25 +28,31 @@ goodPVMod.SetMaxAbsZ(24.0)
 goodPVMod.SetMaxRho(2.0)
 goodPVMod.SetIsMC(False)
 goodPVMod.SetVertexesName('PrimaryVertexes')
+# ------------------------------------------
 
-eleIdMod = mithep.ElectronIDMod()
-eleIdMod.SetPtMin(30.)
-eleIdMod.SetEtaMax(2.5)
-eleIdMod.SetApplyEcalFiducial(True)
-eleIdMod.SetIDType('CustomTight')
-eleIdMod.SetIsoType('PFIso')
-eleIdMod.SetApplyConversionFilterType1(False)
-eleIdMod.SetApplyConversionFilterType2(False)
-eleIdMod.SetChargeFilter(False)
-eleIdMod.SetApplyD0Cut(True)
-eleIdMod.SetApplyDZCut(True)
-eleIdMod.SetWhichVertex(0)
-eleIdMod.SetNExpectedHitsInnerCut(2)
-eleIdMod.SetElectronsFromBranch(True)
-eleIdMod.SetInputName('Electrons')
-eleIdMod.SetGoodElectronsName('TightElectrons')
-eleIdMod.SetRhoType(mithep.RhoUtilities.CMS_RHO_RHOKT6PFJETS)
+# ------------------------------------------
+# Not sure how/if I should change the inputs in these functions
+muonIdMod = mithep.MuonIDMod()
+muonIdMod.SetPtMin(30.)
+muonIdMod.SetEtaMax(2.5)
+muonIdMod.SetApplyEcalFiducial(True)
+muonIdMod.SetIDType('CustomTight')
+muonIdMod.SetIsoType('PFIso')
+muonIdMod.SetApplyConversionFilterType1(False)
+muonIdMod.SetApplyConversionFilterType2(False)
+muonIdMod.SetChargeFilter(False)
+muonIdMod.SetApplyD0Cut(True)
+muonIdMod.SetApplyDZCut(True)
+muonIdMod.SetWhichVertex(0)
+muonIdMod.SetNExpectedHitsInnerCut(2)
+muonIdMod.SetmuonsFromBranch(True)
+muonIdMod.SetInputName('muons')
+muonIdMod.SetGoodmuonsName('Tightmuons')
+muonIdMod.SetRhoType(mithep.RhoUtilities.CMS_RHO_RHOKT6PFJETS)
+# ------------------------------------------
 
+# ------------------------------------------
+# I don't think this has to be changed.
 phoIdMod = mithep.PhotonIDMod()
 phoIdMod.SetPtMin(10.0)
 phoIdMod.SetOutputName('MediumPhotonsNoEVeto')
@@ -55,17 +64,20 @@ phoIdMod.SetApplyConversionId(False)
 phoIdMod.SetApplyFiduciality(True)
 phoIdMod.SetIsData(True)
 phoIdMod.SetPhotonsFromBranch(True)
+# ------------------------------------------
 
 ntuplesMod = mithep.NtuplesMod('NtuplesMod', 'Flat ntuples producer')
-ntuplesMod.SetTagElectronsName('TightElectrons')
+# Check for naming discrepancies
+ntuplesMod.SetTagMuonsName('TightMuons')
 ntuplesMod.SetProbePhotonsName('MediumPhotonsNoEVeto')
-ntuplesMod.SetTriggerObjectsName('SingleElectronTriggerObjects')
+# Check for naming discrepancies
+ntuplesMod.SetTriggerObjectsName('SingleMuonTriggerObjects')
 ntuplesMod.SetTriggerMatchName('hltEle27WP80TrackIsoFilter')
 
 analysis.AddSuperModule(hltMod)
 hltMod.Add(goodPVMod)
-goodPVMod.Add(eleIdMod)
-eleIdMod.Add(phoIdMod)
+goodPVMod.Add(muonIdMod)
+muonIdMod.Add(phoIdMod)
 phoIdMod.Add(ntuplesMod)
 
 analysis.Run(False)
