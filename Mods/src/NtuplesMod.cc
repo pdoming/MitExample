@@ -14,7 +14,7 @@ mithep::NtuplesMod::NtuplesMod(char const* _name/* = "mithep::NtuplesMod"*/, cha
   fProbePhotonsName("ProbePhotons"),
   fTriggerObjectsName(mithep::Names::gkHltObjBrn),
   fTriggerMatchName(""),
-  fTagElectrons(0),
+  fTagMuons(0),
   fProbePhotons(0),
   fEvent(),
   fNtuples(0)
@@ -57,13 +57,13 @@ mithep::NtuplesMod::Process()
 
   std::vector<Muon const*> tags;
   for (unsigned iE(0); iE != fTagMuons->GetEntries(); ++iE) {
-    Muon const& inEle(*fTagMuons->At(iE));
+    Muon const& inMu(*fTagMuons->At(iE));
 
     if (doTriggerMatch) {
       unsigned iT(0);
       for (; iT != matchObjects.size(); ++iT) {
-        double dEta(matchObjects[iT]->Eta() - inEle.Eta());
-        double dPhi(TVector2::Phi_mpi_pi(matchObjects[iT]->Phi() - inEle.Phi()));
+        double dEta(matchObjects[iT]->Eta() - inMu.Eta());
+        double dPhi(TVector2::Phi_mpi_pi(matchObjects[iT]->Phi() - inMu.Phi()));
 
         if (dEta * dEta + dPhi * dPhi < 0.15 * 0.15)
           break;
@@ -74,7 +74,7 @@ mithep::NtuplesMod::Process()
 
     // apply more cuts to tag
 
-    tags.push_back(&inEle);
+    tags.push_back(&inMu);
   }
 
   std::vector<Photon const*> probes;
@@ -91,8 +91,8 @@ mithep::NtuplesMod::Process()
   for (Muon const* tag : tags) {
     for (Photon const* probe : probes) {
       // candidates overlap in supercluster -> a same EG object
-      if (tag->SCluster() == probe->SCluster())
-        continue;
+      //  if (tag->SCluster() == probe->SCluster())
+      //  continue;
 
       auto&& pair(fEvent.addNew());
 
