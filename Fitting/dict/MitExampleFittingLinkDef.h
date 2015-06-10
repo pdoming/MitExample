@@ -8,5 +8,5 @@
 #pragma link C++ nestedtypedef;
 #pragma link C++ namespace mithep;
 
-#pragma link C++ class mithep::FittingUtils+;
+#pragma link C++ class mithep::FittingUtils;
 #endif
