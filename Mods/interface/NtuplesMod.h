@@ -2,7 +2,6 @@
 #define MITEXAMPLE_MODS_NTUPLESMOD_H
 
 #include "MitAna/TreeMod/interface/BaseMod.h"
-#include "MitAna/DataTree/interface/ElectronCol.h"
 #include "MitAna/DataTree/interface/PhotonCol.h"
 #include "MitAna/DataTree/interface/TriggerObjectCol.h"
 #include "MitAna/DataTree/interface/MuonCol.h"
