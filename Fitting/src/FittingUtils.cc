@@ -14,8 +14,8 @@ mithep::FittingUtils::createDataSet(TTree* _source, RooArgSet* _argset, char con
   event.setAddress(*_source);
 
   // obtain variables of interest from the arg set
-  RooRealVar* mass(dynamic_cast<RooRealVar*>(_argset->find("mass")));
-  if (!mass)
+  RooRealVar* pt(dynamic_cast<RooRealVar*>(_argset->find("pt")));
+  if (!pt)
     return 0;
 
   RooDataSet* dataset(new RooDataSet(_name, _title, *_argset));
@@ -34,7 +34,7 @@ mithep::FittingUtils::createDataSet(TTree* _source, RooArgSet* _argset, char con
 
       // Set variable values
 
-      mass->setVal((pTag + pProbe).M());
+      pt->setVal((pTag + pProbe).Pt());
 
       dataset->add(*_argset);
     }

@@ -9,6 +9,7 @@
 #include "TLorentzVector.h"
 #include "TTree.h"
 #include "TString.h"
+#include "TObject.h"
 
 namespace mithep {
   
@@ -29,6 +30,10 @@ namespace mithep {
     void SlaveBegin() override;
     void SlaveTerminate() override;
     void SetupMyBranches(TTree&);
+    bool MediumPhoton(TLorentzVector muon1Data, TLorentzVector muon2Data, TLorentzVector mediumPhotonData,
+                      Float_t MinZMassCut, Float_t MaxZMassCut);
+    bool LoosePhoton(TLorentzVector muon1Data, TLorentzVector muon2Data, TLorentzVector loosePhotonData, 
+                     Float_t MinZMassCut, Float_t MaxZMassCut);
 
     TString fMuonsName;
     TString fMediumPhotonsName;
@@ -47,15 +52,25 @@ namespace mithep {
     Float_t muon1Pt;
     Float_t muon1Eta;
     Float_t muon1Phi;
+    Float_t muon1Mass;
     Float_t muon2Pt;
     Float_t muon2Eta;
     Float_t muon2Phi;
+    Float_t muon2Mass;
     Float_t mediumPhotonPt;
     Float_t mediumPhotonEta;
     Float_t mediumPhotonPhi;
+    Float_t mediumPhotonM;
     Float_t loosePhotonPt;
     Float_t loosePhotonEta;
     Float_t loosePhotonPhi;
+    Float_t loosePhotonM;
+
+    // Declaration of TLorentzVectors for photon selection
+    TLorentzVector muon1Data;
+    TLorentzVector muon2Data;
+    TLorentzVector mediumPhotonData;
+    TLorentzVector loosePhotonData;
 
     Float_t MinZMassCut;
     Float_t MaxZMassCut;
