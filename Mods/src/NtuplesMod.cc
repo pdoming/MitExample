@@ -130,5 +130,3 @@ void
 mithep::NtuplesMod::SlaveTerminate()
 {
 }
-
-

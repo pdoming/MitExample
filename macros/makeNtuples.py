@@ -8,15 +8,16 @@ ROOT.gSystem.Load('libMitExampleMods.so')
 mithep = ROOT.mithep
 
 analysis = mithep.Analysis()
-analysis.SetOutputName('Ntuples.root')
-analysis.SetKeepHierarchy(False)
+analysis.SetOutputName('ntuples.root')
+# analysis.SetKeepHierarchy(False)
 
-analysis.AddFile('/mnt/hadoop/cms/store/user/paus/filefi/032/r12a-dmu-j22-v1/001AE30A-BA81-E211-BBE7-003048FFD770.root')
-#analysis.SetProcessNEvents(1000)
+analysis.AddFile('/mnt/hadoop/cms/store/user/paus/filefi/032/r12b-dmu-j22-v1/6A568598-3369-E211-AD8E-00259073E4A2.root')
+# analysis.SetProcessNEvents(1000)
 
 hltMod = mithep.HLTMod()
+#hltMod.SetPrintTable(True)
 hltMod.SetBitsName('HLTBits')
-hltMod.SetTrigObjsName('DoubleMuonTriggerObjects')
+hltMod.SetTrigObjsName('DoubleMuTriggerObjects')
 hltMod.AddTrigger('HLT_Mu17_v*')
 hltMod.AddTrigger('HLT_Mu17_Mu8_v*')
 hltMod.AddTrigger('HLT_Mu17_TkMu8_v*')
@@ -75,7 +76,7 @@ muonIdMod.SetOutputName('TightMuons')
 
 # ------------------------------------------
 phoIdMod = mithep.PhotonIDMod()
-phoIdMod.SetPtMin(10.0)
+phoIdMod.SetPtMin(5.0)
 phoIdMod.SetOutputName('MediumPhotons')
 phoIdMod.SetIDType('EgammaMedium')
 phoIdMod.SetIsoType('MITPUCorrected')
@@ -87,15 +88,15 @@ phoIdMod.SetIsData(True)
 phoIdMod.SetPhotonsFromBranch(True)
 # ------------------------------------------
 
-ntuplesMod = mithep.NtuplesMod('NtuplesMod', 'Flat ntuples producer')
-ntuplesMod.SetTagMuonsName('TightMuons')
-ntuplesMod.SetProbePhotonsName('MediumPhotons')
-ntuplesMod.SetTriggerObjectsName('DoubleMuonTriggerObjects')
-ntuplesMod.SetTriggerMatchName('hltL3fL1sMu12L3Filtered17')
+mumuGammaMod = mithep.MuMuGammaMod('MuMuGammaMod', 'Flat mumuGamma producer')
+mumuGammaMod.SetMuonsName('TightMuons')
+mumuGammaMod.SetMediumPhotonsName('MediumPhotons')
+mumuGammaMod.SetTriggerObjectsName('DoubleMuTriggerObjects')
 
 analysis.AddSuperModule(hltMod)
 hltMod.Add(goodPVMod)
 goodPVMod.Add(muonIdMod)
 muonIdMod.Add(phoIdMod)
-phoIdMod.Add(ntuplesMod)
+phoIdMod.Add(mumuGammaMod)
+
 analysis.Run(False)
